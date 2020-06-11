@@ -16,7 +16,7 @@ public class HarkkaMain extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader ldr = new FXMLLoader(getClass().getResource("HarkkaGUIView.fxml"));
+            FXMLLoader ldr = new FXMLLoader(getClass().getResource("PaavalikkoGUIView.fxml"));
             final Pane root = ldr.load();
             //final HarkkaGUIController harkkaCtrl = (HarkkaGUIController) ldr.getController();
             Scene scene = new Scene(root);
