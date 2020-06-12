@@ -9,7 +9,7 @@ import javafx.fxml.FXMLLoader;
 
 /**
  * @author antti
- * @version 7.6.2020
+ * @version 12.6.2020
  *
  */
 public class HarkkaMain extends Application {
