@@ -65,6 +65,23 @@ public class HarkkaGUIController {
         avaa();
     }
     
+    @FXML
+    void handleLisaaRyhma() {
+         lisaaRyhma();
+    }
+    
+    
+    @FXML
+    void handlePoistaRyhmä() {
+         poistaRyhma();
+    }
+    
+    
+    
+   // @FXML
+    //void handleLisaaUusiRyhmaNappi() {
+    //     lisaaUusiRyhmaNappi();
+   // }
  //--------------------------------------------------------------------------------
     /**
      * Aliohjelma, joka avaisi selaimella ikkunan, jossa näkyisi ohjeita ohjelman käyttöön kun valmis
@@ -122,6 +139,21 @@ public class HarkkaGUIController {
         String kuntosalinNimi = Dialogs.showInputDialog("Anna kuntosalin nimi", "Kuntosali");
         if ( kuntosalinNimi == null ) return;
     }
+    
+    
+    private void lisaaRyhma() {
+        ModalController.showModal(HarkkaGUIController.class.getResource("RyhmaLisaysGUIView.fxml"), "Uuden ryhmäliikunnan lisäys", null, "");
+    }
+    
+    private void poistaRyhma() {
+        Dialogs.showMessageDialog("Ei osata vielä poistaa ryhmäliikuntaa");
+    }
+    
+    
+   // private void lisaaUusiRyhmaNappi(){
+     //   Dialogs.showMessageDialog("Ei osata vielä lisätä ryhmäliikuntaa");
+   // }
+    
 }
                 
            
