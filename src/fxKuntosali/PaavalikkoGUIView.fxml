@@ -10,17 +10,15 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="harkkapackage.HarkkaGUIController">
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxKuntosali.HarkkaGUIController">
    <bottom>
       <HBox alignment="BOTTOM_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
@@ -79,42 +77,9 @@
       </MenuBar>
    </top>
    <center>
-      <ScrollPane BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="panelAsiakas" BorderPane.alignment="CENTER">
          <content>
-            <GridPane hgap="10.0">
-              <columnConstraints>
-                <ColumnConstraints fillWidth="false" halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Label text="Nimi" />
-                  <TextField editable="false" text="Sukunimi Etunimi" GridPane.columnIndex="1" />
-                  <Label text="Puh.Nro." GridPane.rowIndex="1" />
-                  <TextField editable="false" text="0123456789" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="Sähköposti" GridPane.rowIndex="2" />
-                  <TextField editable="false" text="esim@esimmail.net" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Katuosoite" GridPane.rowIndex="3" />
-                  <TextField editable="false" text="Esimerkkikatu 5" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label text="Postinumero" GridPane.rowIndex="4" />
-                  <Label text="Postiosoite" GridPane.rowIndex="5" />
-                  <Label text="Jäsen. voim." GridPane.rowIndex="6" />
-                  <TextField editable="false" text="69420" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField editable="false" text="Esimkaupunki" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                  <TextField editable="false" text="010318-010720" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-               </children>
-               <padding>
-                  <Insets left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </GridPane>
+            <TextArea prefWidth="256.0" />
          </content>
       </ScrollPane>
    </center>
@@ -131,7 +96,7 @@
                   <Insets bottom="15.0" />
                </padding>
             </Label>
-            <ListChooser prefHeight="200" rivit="&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi" />
+            <ListChooser fx:id="chooserAsiakkaat" prefHeight="200" rivit="&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi&#10;Sukunimi Etunimi" />
          </children>
       </VBox>
    </left>
