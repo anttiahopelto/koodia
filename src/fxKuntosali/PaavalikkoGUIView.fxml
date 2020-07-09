@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxKuntosali.HarkkaGUIController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxKuntosali.HarkkaGUIController">
    <bottom>
       <HBox alignment="BOTTOM_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
          <children>

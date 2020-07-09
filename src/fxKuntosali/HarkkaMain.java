@@ -38,8 +38,8 @@ public class HarkkaMain extends Application {
             });
            
             
-            primaryStage.show();
-            
+            primaryStage.show();    
+            primaryStage.setResizable(false); // ei voi muuttaa kokoa
           
         } catch(Exception e) {
             e.printStackTrace();
