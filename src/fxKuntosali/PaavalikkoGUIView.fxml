@@ -27,7 +27,7 @@
                   <Tooltip text="Tallenna muutokset" />
                </tooltip>
             </Button>
-            <Button onAction="#handleLisaaJasen" text="_Lisää uusi jäsen">
+            <Button onAction="#handleLisaaAsiakas" text="_Lisää uusi jäsen">
                <tooltip>
                   <Tooltip text="Uuden jäsenen lisäys" />
                </tooltip>
@@ -64,7 +64,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Muokkaa">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#handleLisaaJasen" text="Lisää jäsen" />
+              <MenuItem mnemonicParsing="false" onAction="#handleLisaaAsiakas" text="Lisää jäsen" />
                   <MenuItem mnemonicParsing="false" onAction="#handleMuokkaa" text="Muokkaa jäsenen tietoja" />
             </items>
           </Menu>

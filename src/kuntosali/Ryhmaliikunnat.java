@@ -1,7 +1,13 @@
 package kuntosali;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
-
 
 /**
  * Kuntosalin Ryhmaliikunnat, osaa mm. lisätä uuden ryhmaliikunnan
@@ -11,11 +17,11 @@ import java.util.*;
  */
 public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
 
-    private String                      tiedostonNimi = "";
+    private boolean muutettu = false;
+    private String tiedostonNimi = "kuntosali/ryhmaliikunnat";
 
     /** Taulukko ryhmaliikunnoista */
-    private final Collection<Ryhmaliikunta> alkiot        = new ArrayList<Ryhmaliikunta>();
-
+    private final Collection<Ryhmaliikunta> alkiot = new ArrayList<Ryhmaliikunta>();
 
     /**
      * Ryhmaliikuntojen alustaminen
@@ -31,28 +37,92 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
      */
     public void lisaa(Ryhmaliikunta ryhma) {
         alkiot.add(ryhma);
+        muutettu = true;
     }
 
 
     /**
-     * Lukee asiakkaat tiedostosta.  
-     * TODO Kesken.
-     * @param hakemisto tiedoston hakemisto
      * @throws SailoException jos lukeminen epäonnistuu
      */
-    public void lueTiedostosta(String hakemisto) throws SailoException {
-        tiedostonNimi = hakemisto + ".har";
-        throw new SailoException("Ei osata vielä lukea tiedostoa " + tiedostonNimi);
+    // TODO Testit
+    public void lueTiedostosta() throws SailoException {
+        try (BufferedReader fi = new BufferedReader(
+                new FileReader(getTiedostonNimi()))) {
+
+            String rivi;
+            while ((rivi = fi.readLine()) != null) {
+                rivi = rivi.trim();
+                if ("".equals(rivi) || rivi.charAt(0) == ';')
+                    continue;
+                Ryhmaliikunta ryhmaliikunta = new Ryhmaliikunta();
+                ryhmaliikunta.parse(rivi); // voisi olla virhekäsittely
+                lisaa(ryhmaliikunta);
+            }
+            muutettu = false;
+
+        } catch (FileNotFoundException e) {
+            throw new SailoException(
+                    "Tiedosto " + getTiedostonNimi() + " ei aukea");
+        } catch (IOException e) {
+            throw new SailoException(
+                    "Ongelmia tiedoston kanssa: " + e.getMessage());
+        }
     }
 
 
     /**
-     * Tallentaa ryhmaliikunnat tiedostoon.  
-     * TODO Kesken.
+     * Asettaa tiedoston perusnimen ilan tarkenninta
+     * @param tied tallennustiedoston perusnimi
+     */
+    public void setTiedostonPerusNimi(String tied) {
+        tiedostonNimi = tied;
+    }
+
+
+    /**
+     * Tallentaa harrastukset tiedostoon.
      * @throws SailoException jos talletus epäonnistuu
      */
-    public void talleta() throws SailoException {
-        throw new SailoException("Ei osata vielä tallettaa tiedostoa " + tiedostonNimi);
+    public void tallenna() throws SailoException {
+        if (!muutettu)
+            return;
+
+        File fbak = new File(getBakNimi());
+        File ftied = new File(getTiedostonNimi());
+        fbak.delete(); // if ... System.err.println("Ei voi tuhota");
+        ftied.renameTo(fbak); // if ... System.err.println("Ei voi nimetä");
+
+        try (PrintWriter fo = new PrintWriter(
+                new FileWriter(ftied.getCanonicalPath()))) {
+            for (Ryhmaliikunta rl : this) {
+                fo.println(rl.toString());
+            }
+        } catch (FileNotFoundException ex) {
+            throw new SailoException(
+                    "Tiedosto " + ftied.getName() + " ei aukea");
+        } catch (IOException ex) {
+            throw new SailoException("Tiedoston " + ftied.getName()
+                    + " kirjoittamisessa ongelmia");
+        }
+
+        muutettu = false;
+    }
+
+
+    /**
+     * Palauttaa varakopiotiedoston nimen
+     * @return varakopiotiedoston nimi
+     */
+    public String getBakNimi() {
+        return tiedostonNimi + ".bak";
+    }
+
+
+    /**
+     * @return tallennustiedoston nimi, jota käytetään tallennukseen
+     */
+    public String getTiedostonNimi() {
+        return tiedostonNimi + ".dat";
     }
 
 
@@ -74,14 +144,14 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
      * #PACKAGEIMPORT
      * #import java.util.*;
      * 
-     *  Harrastukset harrasteet = new Harrastukset();
-     *  Harrastus pitsi21 = new Harrastus(2); harrasteet.lisaa(pitsi21);
-     *  Harrastus pitsi11 = new Harrastus(1); harrasteet.lisaa(pitsi11);
-     *  Harrastus pitsi22 = new Harrastus(2); harrasteet.lisaa(pitsi22);
-     *  Harrastus pitsi12 = new Harrastus(1); harrasteet.lisaa(pitsi12);
-     *  Harrastus pitsi23 = new Harrastus(2); harrasteet.lisaa(pitsi23);
+     *  Ryhmaliikunnat ryhmat = new Ryhmaliikunnat();
+     *  Ryhmaliikunta pitsi21 = new Ryhmaliikunta(2); ryhmat.lisaa(pitsi21);
+     *  Ryhmaliikunta pitsi11 = new Ryhmaliikunta(1); ryhmat.lisaa(pitsi11);
+     *  Ryhmaliikunta pitsi22 = new Ryhmaliikunta(2); ryhmat.lisaa(pitsi22);
+     *  Ryhmaliikunta pitsi12 = new Ryhmaliikunta(1); ryhmat.lisaa(pitsi12);
+     *  Ryhmaliikunta pitsi23 = new Ryhmaliikunta(2); ryhmat.lisaa(pitsi23);
      * 
-     *  Iterator<Harrastus> i2=harrasteet.iterator();
+     *  Iterator<Ryhmaliikunta> i2=ryhmat.iterator();
      *  i2.next() === pitsi21;
      *  i2.next() === pitsi11;
      *  i2.next() === pitsi22;
@@ -90,10 +160,10 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
      *  i2.next() === pitsi12;  #THROWS NoSuchElementException  
      *  
      *  int n = 0;
-     *  int jnrot[] = {2,1,2,1,2};
+     *  int anrot[] = {2,1,2,1,2};
      *  
-     *  for ( Harrastus har:harrasteet ) { 
-     *    har.getJasenNro() === jnrot[n]; n++;  
+     *  for ( Ryhmaliikunta ryhma:ryhmat ) { 
+     *    ryhma.getAsiakasNro() === anrot[n]; n++;  
      *  }
      *  
      *  n === 5;
@@ -114,7 +184,8 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
     public List<Ryhmaliikunta> annaRyhmaliikunnat(int tunnusnro) {
         List<Ryhmaliikunta> loydetyt = new ArrayList<Ryhmaliikunta>();
         for (Ryhmaliikunta ryhma : alkiot)
-            if (ryhma.getAsiakasNro() == tunnusnro) loydetyt.add(ryhma);
+            if (ryhma.getAsiakasNro() == tunnusnro)
+                loydetyt.add(ryhma);
         return loydetyt;
     }
 
@@ -140,7 +211,8 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
         ryhmat.lisaa(kuntopiiri2);
         ryhmat.lisaa(kuntopiiri4);
 
-        System.out.println("============= Ryhmaliikunnat testi =================");
+        System.out.println(
+                "============= Ryhmaliikunnat testi =================");
 
         List<Ryhmaliikunta> ryhmaliikunnat2 = ryhmat.annaRyhmaliikunnat(2);
 
