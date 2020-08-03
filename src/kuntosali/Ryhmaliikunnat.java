@@ -42,12 +42,45 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
 
 
     /**
+     * @param nimi tiedoston nimi
      * @throws SailoException jos lukeminen epäonnistuu
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException 
+     * #import java.io.File;
+     * #PACKAGEIMPORT
+     *  Ryhmaliikunnat harrasteet = new Ryhmaliikunnat();
+     *  Ryhmaliikunta pitsi21 = new Ryhmaliikunta(); pitsi21.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi11 = new Ryhmaliikunta(); pitsi11.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi22 = new Ryhmaliikunta(); pitsi22.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi12 = new Ryhmaliikunta(); pitsi12.taytaRyhmaliikunta(1); 
+     *  Ryhmaliikunta pitsi23 = new Ryhmaliikunta(); pitsi23.taytaRyhmaliikunta(1); 
+     *  String tiedNimi = "testiryhmat.dat";
+     *  File ftied = new File(tiedNimi);
+     *  ftied.delete();
+     *  harrasteet.lueTiedostosta(tiedNimi); #THROWS SailoException
+     *  harrasteet.lisaa(pitsi21);
+     *  harrasteet.lisaa(pitsi11);
+     *  harrasteet.lisaa(pitsi22);
+     *  harrasteet.lisaa(pitsi12);
+     *  harrasteet.lisaa(pitsi23);
+     *  harrasteet.tallenna(tiedNimi);
+     *  harrasteet = new Ryhmaliikunnat();
+     *  harrasteet.lueTiedostosta(tiedNimi);
+     *  Iterator<Ryhmaliikunta> i = harrasteet.iterator();
+     *  i.next().toString() === pitsi21.toString();
+     *  i.next().toString() === pitsi11.toString();
+     *  i.next().toString() === pitsi22.toString();
+     *  i.next().toString() === pitsi12.toString();
+     *  i.next().toString() === pitsi23.toString();
+     *  i.hasNext() === false;
+     *  harrasteet.lisaa(pitsi23);
+     *  harrasteet.tallenna(tiedNimi);
+     * </pre>
      */
-    // TODO Testit
-    public void lueTiedostosta() throws SailoException {
+    public void lueTiedostosta(String nimi) throws SailoException {
         try (BufferedReader fi = new BufferedReader(
-                new FileReader(getTiedostonNimi()))) {
+                new FileReader(nimi))) {
 
             String rivi;
             while ((rivi = fi.readLine()) != null) {
@@ -81,14 +114,48 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
 
     /**
      * Tallentaa harrastukset tiedostoon.
+     * @param nimi tiedoston nimi
      * @throws SailoException jos talletus epäonnistuu
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException 
+     * #import java.io.File;
+     * #PACKAGEIMPORT
+     *  Ryhmaliikunnat harrasteet = new Ryhmaliikunnat();
+     *  Ryhmaliikunta pitsi21 = new Ryhmaliikunta(); pitsi21.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi11 = new Ryhmaliikunta(); pitsi11.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi22 = new Ryhmaliikunta(); pitsi22.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi12 = new Ryhmaliikunta(); pitsi12.taytaRyhmaliikunta(1); 
+     *  Ryhmaliikunta pitsi23 = new Ryhmaliikunta(); pitsi23.taytaRyhmaliikunta(1); 
+     *  String tiedNimi = "testiryhmat.dat";
+     *  File ftied = new File(tiedNimi);
+     *  ftied.delete();
+     *  harrasteet.lueTiedostosta(tiedNimi); #THROWS SailoException
+     *  harrasteet.lisaa(pitsi21);
+     *  harrasteet.lisaa(pitsi11);
+     *  harrasteet.lisaa(pitsi22);
+     *  harrasteet.lisaa(pitsi12);
+     *  harrasteet.lisaa(pitsi23);
+     *  harrasteet.tallenna(tiedNimi);
+     *  harrasteet = new Ryhmaliikunnat();
+     *  harrasteet.lueTiedostosta(tiedNimi);
+     *  Iterator<Ryhmaliikunta> i = harrasteet.iterator();
+     *  i.next().toString() === pitsi21.toString();
+     *  i.next().toString() === pitsi11.toString();
+     *  i.next().toString() === pitsi22.toString();
+     *  i.next().toString() === pitsi12.toString();
+     *  i.next().toString() === pitsi23.toString();
+     *  i.hasNext() === false;
+     *  harrasteet.lisaa(pitsi23);
+     *  harrasteet.tallenna(tiedNimi);
+     * </pre>
      */
-    public void tallenna() throws SailoException {
+    public void tallenna(String nimi) throws SailoException {
         if (!muutettu)
             return;
 
         File fbak = new File(getBakNimi());
-        File ftied = new File(getTiedostonNimi());
+        File ftied = new File(nimi);
         fbak.delete(); // if ... System.err.println("Ei voi tuhota");
         ftied.renameTo(fbak); // if ... System.err.println("Ei voi nimetä");
 

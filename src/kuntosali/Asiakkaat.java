@@ -68,10 +68,30 @@ public class Asiakkaat implements Iterable<Asiakas> {
 
     /**
      * Lukee asiakkaat tiedostosta.
+     * @param tiedosto tiedoston nimi
      * @throws SailoException jos lukeminen epäonnistuu
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException 
+     * #import java.io.File;
+     * 
+     *  Asiakkaat jasenet = new Asiakkaat();
+     *  Asiakas aku1 = new Asiakas(), aku2 = new Asiakas(),aku3 = new Asiakas();
+     *  aku1.taytaAsiakas();
+     *  aku2.taytaAsiakas();
+     *  aku3.taytaAsiakas();
+     *  jasenet.lueTiedostosta("kuntosali/testi.dat"); 
+     *  jasenet.lisaa(aku1);
+     *  jasenet.lisaa(aku2);
+     *  jasenet.lisaa(aku3);
+     *  jasenet.tallenna("kuntosali/testi.dat");
+     *  Iterator<Asiakas> i = jasenet.iterator();
+     *  i.hasNext() === true;
+     *  i.next() === aku2;
+     * </pre>
      */
-    public void lueTiedostosta() throws SailoException {
-        File ftied = new File("kuntosali/asiakkaat.dat");
+    public void lueTiedostosta(String tiedosto) throws SailoException {
+        File ftied = new File(tiedosto);
         try (BufferedReader fi = new BufferedReader(
                 new FileReader(ftied.getCanonicalPath()))) {
             kokoNimi = fi.readLine();
@@ -103,13 +123,47 @@ public class Asiakkaat implements Iterable<Asiakas> {
 
     /**
      * Tallentaa asiakkaat tiedostoon.
+     * @param tiedosto tiedoston nimi
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException 
+     * #import java.io.File;
+     * #PACKAGEIMPORT
+     *  Asiakkaat asiakkaat = new Asiakkaat();
+     *  Asiakas pitsi21 = new Asiakas(); pitsi21.taytaAsiakas();
+     *  Asiakas pitsi11 = new Asiakas(); pitsi11.taytaAsiakas();
+     *  Asiakas pitsi22 = new Asiakas(); pitsi22.taytaAsiakas();
+     *  Asiakas pitsi12 = new Asiakas(); pitsi12.taytaAsiakas(); 
+     *  Asiakas pitsi23 = new Asiakas(); pitsi23.taytaAsiakas(); 
+     *  String tiedNimi = "testi.dat";
+     *  File ftied = new File(tiedNimi);
+     *  ftied.delete();
+     *  asiakkaat.lueTiedostosta(tiedNimi); #THROWS SailoException
+     *  asiakkaat.lisaa(pitsi21);
+     *  asiakkaat.lisaa(pitsi11);
+     *  asiakkaat.lisaa(pitsi22);
+     *  asiakkaat.lisaa(pitsi12);
+     *  asiakkaat.lisaa(pitsi23);
+     *  asiakkaat.tallenna(tiedNimi);
+     *  asiakkaat = new Asiakkaat();
+     *  asiakkaat.lueTiedostosta(tiedNimi); 
+     *  Iterator<Asiakas> i = asiakkaat.iterator();
+     *  i.next().toString() === pitsi21.toString();
+     *  i.next().toString() === pitsi11.toString();
+     *  i.next().toString() === pitsi22.toString();
+     *  i.next().toString() === pitsi12.toString();
+     *  i.next().toString() === pitsi23.toString();
+     *  i.hasNext() === false;
+     *  asiakkaat.lisaa(pitsi23);
+     *  asiakkaat.tallenna(tiedNimi);
+     * </pre>
      * @throws SailoException jos tallennus epäonnistuu
      * 
      */
-    public void tallenna() throws SailoException {
+    public void tallenna(String tiedosto) throws SailoException {
         if (!muutettu)
             return;
-        File ftied = new File("kuntosali/asiakkaat.dat");
+        File ftied = new File(tiedosto);
         try (PrintWriter fo = new PrintWriter(
                 new FileWriter(ftied.getCanonicalPath()))) {
             fo.println(getKokoNimi());
@@ -286,6 +340,19 @@ public class Asiakkaat implements Iterable<Asiakas> {
      * @param hakuehto Millä ehdolla haetaan
      * @param k mistä kentästä
      * @return tietorakenne löydetyistä asiakkaista
+     * @example 
+     * <pre name="test"> 
+     * #THROWS SailoException  
+     * Asiakkaat jasenet = new Asiakkaat(); 
+     * Asiakas aku1 = new Asiakas(), aku2 = new Asiakas(), aku3 = new Asiakas(); 
+     * aku1.rekisteroi(); aku2.rekisteroi(); aku3.rekisteroi(); 
+     * int id1 = aku1.getTunnusNro(); 
+     * jasenet.lisaa(aku1); jasenet.lisaa(aku2); jasenet.lisaa(aku3); 
+     * jasenet.poista(id1+1) === 1; 
+     * jasenet.annaId(id1+1) === null; jasenet.getLkm() === 2; 
+     * jasenet.poista(id1) === 1; jasenet.getLkm() === 1; 
+     * jasenet.poista(id1+3) === 0; jasenet.getLkm() === 1; 
+     * </pre> 
      */
     public Collection<Asiakas> etsi(String hakuehto, int k) {
         String ehto = "*";

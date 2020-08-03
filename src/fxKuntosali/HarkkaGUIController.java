@@ -340,7 +340,22 @@ public class HarkkaGUIController implements Initializable {
 
     /**
      * Aliohjelma joka tarkistaa onko asiakkuus loppumassa 30pv sisällä.
-     * Näyttää paljon päiviä jäljellä. Teksti punainen jos alle 30
+     * Näyttää paljon päiviä jäljellä. Teksti punainen jos alle 
+     * @example
+     * <pre name="test">
+     * #PACKAGEIMPORT
+     * #import kuntosali.*;
+     * Kuntosali kuntosali = new Kuntosali();
+     * Asiakas asiakas = new Asiakas();
+     * Asiakas asiakas1 = new Asiakas();
+     * Asiakas asiakas2 = new Asiakas();
+     * asiakas1.parse("5|Kari Taalasmaa|0402470506|Kahvakuulantie 7|56700|Kangasala|kari.taalasmaa@hotmail.com|2018-02-23|2020-11-24");
+     * asiakas.parse("6|Seppo Taalasmaa|0405330207|Kalliokuja 21|56700|Helsinki|seppo.ukko@hotmail.com|2017-12-01|2020-06-01");
+     * asiakas2.parse("2|Koira Ukko|0123456789|Koirakuja 7|63700|Koirakyla|koiruli@koiramail.com|1998-06-21|2020-08-05");
+     * kuntosali.asiakkuusLoppumassa(asiakas) === -63;
+     * kuntosali.asiakkuusLoppumassa(asiakas1) === 113;
+     * kuntosali.asiakkuusLoppumassa(asiakas2) === 2;
+     * </pre>
      */
     private void asiakkuusLoppumassa() {
         asiakasKohdalla = chooserAsiakkaat.getSelectedObject();

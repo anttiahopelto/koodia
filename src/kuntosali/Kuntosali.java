@@ -69,8 +69,8 @@ public class Kuntosali {
      * @throws SailoException jos lukeminen epäonnistuu
      */
     public void lueTiedostosta() throws SailoException {
-        asiakkaat.lueTiedostosta();
-        ryhmaliikunnat.lueTiedostosta();
+        asiakkaat.lueTiedostosta("kuntosali/asiakkaat.dat");
+        ryhmaliikunnat.lueTiedostosta("kuntosali/ryhmaliikunnat.dat");
     }
 
 
@@ -81,13 +81,13 @@ public class Kuntosali {
     public void tallenna() throws SailoException {
         String virhe = "";
         try {
-            asiakkaat.tallenna();
+            asiakkaat.tallenna("kuntosali/asiakkat.dat");
         } catch (SailoException e) {
             virhe += e.getMessage();
         }
 
         try {
-            ryhmaliikunnat.tallenna();
+            ryhmaliikunnat.tallenna("kuntosali/ryhmaliikunnat.dat");
         } catch (SailoException e) {
             virhe += e.getMessage();
         }
@@ -138,7 +138,6 @@ public class Kuntosali {
         Kuntosali kuntosali = new Kuntosali();
 
         try {
-            // kuntosali.lueTiedostosta("asiakastiedot");
 
             Asiakas ismo1 = new Asiakas(), ismo2 = new Asiakas();
             ismo1.rekisteroi();
@@ -168,6 +167,21 @@ public class Kuntosali {
      * Tarkistaa onko asiakkuus loppumassa seuraavan kuukauden aikana
      * @param asiakas asiakas jonka asiakkuus tarkistetaan
      * @return palauttaa inttinä kuinka monta päivää asiakkuutta jäljellä
+     * @example
+     * <pre name="test">
+     * #PACKAGEIMPORT
+     * #import kuntosali.*;
+     * Kuntosali kuntosali = new Kuntosali();
+     * Asiakas asiakas = new Asiakas();
+     * Asiakas asiakas1 = new Asiakas();
+     * Asiakas asiakas2 = new Asiakas();
+     * asiakas1.parse("5|Kari Taalasmaa|0402470506|Kahvakuulantie 7|56700|Kangasala|kari.taalasmaa@hotmail.com|2018-02-23|2020-11-24");
+     * asiakas.parse("6|Seppo Taalasmaa|0405330207|Kalliokuja 21|56700|Helsinki|seppo.ukko@hotmail.com|2017-12-01|2020-06-01");
+     * asiakas2.parse("2|Koira Ukko|0123456789|Koirakuja 7|63700|Koirakyla|koiruli@koiramail.com|1998-06-21|2020-08-05");
+     * kuntosali.asiakkuusLoppumassa(asiakas) === -63;
+     * kuntosali.asiakkuusLoppumassa(asiakas1) === 113;
+     * kuntosali.asiakkuusLoppumassa(asiakas2) === 2;
+     * </pre>
      */
     public int asiakkuusLoppumassa(Asiakas asiakas) {
 

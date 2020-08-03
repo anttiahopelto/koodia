@@ -85,7 +85,7 @@ public class Asiakas implements Cloneable {
      */
     public void taytaAsiakas() {
 
-        this.nimi = "Ismo Laitela " + Math.random();
+        this.nimi = "Ismo Laitela ";
         this.katuosoite = "Pihlajakatu 23";
         this.postinumero = "00140";
         this.postiosoite = "Helsinki";
