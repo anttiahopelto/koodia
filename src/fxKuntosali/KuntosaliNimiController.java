@@ -9,8 +9,8 @@ import javafx.stage.Stage;
 /**
  * Kystään kerhon nimi ja luodaan tätä varten dialogi.
  * 
- * @author vesal
- * @version 2.1.2016
+ * @author antti
+ * @version 3.8.2020
  */
 public class KuntosaliNimiController
         implements ModalControllerInterface<String> {

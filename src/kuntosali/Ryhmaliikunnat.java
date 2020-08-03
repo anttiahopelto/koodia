@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Kuntosalin Ryhmaliikunnat, osaa mm. lisätä uuden ryhmaliikunnan
  * @author antti
- * @version 5.7.2020
+ * @version 3.8.2020
  *
  */
 public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
@@ -187,6 +187,101 @@ public class Ryhmaliikunnat implements Iterable<Ryhmaliikunta> {
             if (ryhma.getAsiakasNro() == tunnusnro)
                 loydetyt.add(ryhma);
         return loydetyt;
+    }
+
+
+    /**
+     * Poistaa kaikki tietyn tietyn asiakkaan ryhmäliikunnat
+     * @param tunnusNro viite siihen, mihin liittyvät tietueet poistetaan
+     * @return montako poistettiin 
+     */
+    public int poistaAsiakkaanRL(int tunnusNro) {
+        int n = 0;
+        for (Iterator<Ryhmaliikunta> it = alkiot.iterator(); it.hasNext();) {
+            Ryhmaliikunta rl = it.next();
+            if (rl.getAsiakasNro() == tunnusNro) {
+                it.remove();
+                n++;
+            }
+        }
+        if (n > 0)
+            muutettu = true;
+        return n;
+    }
+
+
+    /**
+     * Poistaa valitun ryhmaliikunnan
+     * @param ryhmaliikunta poistettava rl
+     * @return tosi jos löytyi poistettava tietue 
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException 
+     * #import java.io.File;
+     *  Ryhmaliikunnat harrasteet = new Ryhmaliikunnat();
+     *  Ryhmaliikunta pitsi21 = new Ryhmaliikunta(); pitsi21.taytaRyhmaliikunta(2);
+     *  Ryhmaliikunta pitsi11 = new Ryhmaliikunta(); pitsi11.taytaRyhmaliikunta(1);
+     *  Ryhmaliikunta pitsi22 = new Ryhmaliikunta(); pitsi22.taytaRyhmaliikunta(2); 
+     *  Ryhmaliikunta pitsi12 = new Ryhmaliikunta(); pitsi12.taytaRyhmaliikunta(1); 
+     *  Ryhmaliikunta pitsi23 = new Ryhmaliikunta(); pitsi23.taytaRyhmaliikunta(2); 
+     *  harrasteet.lisaa(pitsi21);
+     *  harrasteet.lisaa(pitsi11);
+     *  harrasteet.lisaa(pitsi22);
+     *  harrasteet.lisaa(pitsi12);
+     *  harrasteet.poista(pitsi23) === false ; harrasteet.getLkm() === 4;
+     *  harrasteet.poista(pitsi11) === true;   harrasteet.getLkm() === 3;
+     *  List<Ryhmaliikunta> h = harrasteet.annaRyhmaliikunnat(1);
+     *  h.size() === 1; 
+     *  h.get(0) === pitsi12;
+     * </pre>
+     */
+    public boolean poista(Ryhmaliikunta ryhmaliikunta) {
+        boolean ret = alkiot.remove(ryhmaliikunta);
+        if (ret)
+            muutettu = true;
+        return ret;
+    }
+
+
+    /**
+     * Korvaa ryhmäliikunnan tietorakenteessa.  Ottaa ryhmäliikunnan omistukseensa.
+     * Etsitään samalla tunnusnumerolla oleva ryhmaliikunta.  Jos ei löydy,
+     * niin lisätään uutena ryhmäliikuntana.
+     * @param ryhma lisättävän ryhmaliikunnan viite.  Huom tietorakenne muuttuu omistajaksi
+     * @throws SailoException jos tietorakenne on jo täynnä
+     * @example
+     * <pre name="test">
+     * #THROWS SailoException,CloneNotSupportedException
+     * #PACKAGEIMPORT
+     * Ryhmaliikunnat harrastukset = new Ryhmaliikunnat();
+     * Ryhmaliikunta har1 = new Ryhmaliikunta(), har2 = new Ryhmaliikunta();
+     * har1.rekisteroi(); har2.rekisteroi();
+     * harrastukset.getLkm() === 0;
+     * harrastukset.korvaaTaiLisaa(har1); harrastukset.getLkm() === 1;
+     * harrastukset.korvaaTaiLisaa(har2); harrastukset.getLkm() === 2;
+     * Ryhmaliikunta har3 = har1.clone();
+     * har3.aseta(2,"kkk");
+     * Iterator<Ryhmaliikunta> i2=harrastukset.iterator();
+     * i2.next() === har1;
+     * harrastukset.korvaaTaiLisaa(har3); harrastukset.getLkm() === 2;
+     * i2=harrastukset.iterator();
+     * Ryhmaliikunta h = i2.next();
+     * h === har3;
+     * h == har3 === true;
+     * h == har1 === false;
+     * </pre>
+     */
+    public void korvaaTaiLisaa(Ryhmaliikunta ryhma) throws SailoException {
+        int id = ryhma.getTunnusNro();
+        for (int i = 0; i < getLkm(); i++) {
+            if (((ArrayList<Ryhmaliikunta>) alkiot).get(i)
+                    .getTunnusNro() == id) {
+                ((ArrayList<Ryhmaliikunta>) alkiot).set(i, ryhma);
+                muutettu = true;
+                return;
+            }
+        }
+        lisaa(ryhma);
     }
 
 

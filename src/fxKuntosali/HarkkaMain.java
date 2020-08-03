@@ -9,10 +9,12 @@ import javafx.scene.layout.Pane;
 import javafx.fxml.FXMLLoader;
 
 /**
+ *
  * @author antti
- * @version 12.6.2020
+ * @version 3.8.2020
  *
  */
+// TODO dokumentaatio, testit, ja oma juttu
 public class HarkkaMain extends Application {
     @Override
     public void start(Stage primaryStage) {

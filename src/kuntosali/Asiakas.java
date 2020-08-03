@@ -9,10 +9,10 @@ import fi.jyu.mit.ohj2.Mjonot;
 
 /**
  * @author antti
- * @version 9.7.2020
+ * @version 3.8.2020
  *
  */
-public class Asiakas {
+public class Asiakas implements Cloneable {
 
     private int tunnusNro;
     private String nimi = "";
@@ -26,6 +26,33 @@ public class Asiakas {
     private String loppumispv = "";
 
     private static int seuraavaNro = 1;
+
+    /**
+     * Palauttaa jäsenen kenttien lukumäärän
+     * @return kenttien lukumäärä
+     */
+    public int getKenttia() {
+        return 9;
+    }
+
+
+    /**
+     * Eka kenttä joka on mielekäs kysyttäväksi
+     * @return eknn kentän indeksi
+     */
+    public int ekaKentta() {
+        return 1;
+    }
+
+
+    /**
+     * Alustetaan asiakkaan merkkijono-attribuuti tyhjiksi jonoiksi
+     * ja tunnusnro = 0.
+     */
+    public Asiakas() {
+        // TODO oikea alustus
+    }
+
 
     /**
      * Asettaa tunnusnumeron ja samalla varmistaa että
@@ -127,19 +154,18 @@ public class Asiakas {
     /**
      * Palauttaa asiakkaan tiedot merkkijonona jonka voi tallentaa tiedostoon.
      * @return asiakas tolppaeroteltuna merkkijonona 
-     * @example
-     * <pre name="test">
-     *   Asiakas asiakas = new Asiakas();
-     *   asiakas.parse("   3  |  Ankka Aku   | 030201-111C");
-     *   asiakas.toString().startsWith("3|Ankka Aku|030201-111C|") === true; // on enemmäkin kuin 3 kenttää, siksi loppu |
-     * </pre>  
      */
 
     @Override
     public String toString() {
-        return "" + getTunnusNro() + "|" + nimi + "|" + katuosoite + "|"
-                + postinumero + "|" + postiosoite + "|" + puhelinnumero + "|"
-                + email + "|" + alkamispv + "|" + loppumispv;
+        StringBuffer sb = new StringBuffer("");
+        String erotin = "";
+        for (int k = 0; k < getKenttia(); k++) {
+            sb.append(erotin);
+            sb.append(anna(k));
+            erotin = "|";
+        }
+        return sb.toString();
     }
 
 
@@ -165,16 +191,70 @@ public class Asiakas {
      */
     public void parse(String rivi) {
         StringBuilder sb = new StringBuilder(rivi);
-        setTunnusNro(Mjonot.erota(sb, '|', getTunnusNro()));
-        nimi = Mjonot.erota(sb, '|', nimi);
-        katuosoite = Mjonot.erota(sb, '|', katuosoite);
-        postinumero = Mjonot.erota(sb, '|', postinumero);
-        postiosoite = Mjonot.erota(sb, '|', postiosoite);
-        puhelinnumero = Mjonot.erota(sb, '|', puhelinnumero);
-        email = Mjonot.erota(sb, '|', email);
-        alkamispv = Mjonot.erota(sb, '|', alkamispv);
-        loppumispv = Mjonot.erota(sb, '|', loppumispv);
+        for (int k = 0; k < getKenttia(); k++)
+            aseta(k, Mjonot.erota(sb, '|'));
 
+    }
+
+
+    /**
+     * Tutkii onko jäsenen tiedot samat kuin parametrina tuodun jäsenen tiedot
+     * @param asiakas johon verrataan
+     * @return true jos kaikki tiedot samat, false muuten
+     * @example
+     * <pre name="test">
+     *   Asiakas jasen1 = new Asiakas();
+     *   jasen1.parse("   3  |  Ankka Aku   | 030201-111C");
+     *   Asiakas jasen2 = new Asiakas();
+     *   jasen2.parse("   3  |  Ankka Aku   | 030201-111C");
+     *   Asiakas jasen3 = new Asiakas();
+     *   jasen3.parse("   3  |  Ankka Aku   | 030201-115H");
+     *   
+     *   jasen1.equals(jasen2) === true;
+     *   jasen2.equals(jasen1) === true;
+     *   jasen1.equals(jasen3) === false;
+     *   jasen3.equals(jasen2) === false;
+     * </pre>
+     */
+    public boolean equals(Asiakas asiakas) {
+        if (asiakas == null)
+            return false;
+        for (int k = 0; k < getKenttia(); k++)
+            if (!anna(k).equals(asiakas.anna(k)))
+                return false;
+        return true;
+    }
+
+
+    @Override
+    public boolean equals(Object asiakas) {
+        if (asiakas instanceof Asiakas)
+            return equals((Asiakas) asiakas);
+        return false;
+    }
+
+
+    /**
+     * Tehdään identtinen klooni asiakkaasta
+     * @return Object kloonattu asiakas
+     * @example
+     * <pre name="test">
+     *  #THROWS CloneNotSupportedException 
+     *   Asiakas asiakas = new Asiakas();
+     *   asiakas.parse("   3  |  Ankka Aku   | 123");
+     *   Asiakas kopio = asiakas.clone();
+     *   kopio.toString() === asiakas.toString();
+     *   asiakas.parse("   4  |  Ankka Tupu   | 123");
+     *   kopio.toString().equals(asiakas.toString()) === false;
+     * 
+     * </pre>
+     */
+
+    @Override
+    public Asiakas clone() throws CloneNotSupportedException {
+        Asiakas uusi;
+        uusi = (Asiakas) super.clone();
+        return uusi;
     }
 
 
@@ -193,6 +273,153 @@ public class Asiakas {
 
         asiakas1.tulosta(System.out);
         asiakas2.tulosta(System.out);
+
+    }
+
+
+    /**
+     * @param k mones tietokenttä
+     * @return k tietokentän sisältö merkkijonona
+     */
+    public String anna(int k) {
+        switch (k) {
+        case 0:
+            return "" + tunnusNro;
+        case 1:
+            return "" + nimi;
+        case 2:
+            return "" + puhelinnumero;
+        case 3:
+            return "" + katuosoite;
+        case 4:
+            return "" + postinumero;
+        case 5:
+            return "" + postiosoite;
+        case 6:
+            return "" + email;
+        case 7:
+            return "" + alkamispv;
+        case 8:
+            return "" + loppumispv;
+        default:
+            return "Jees Jees";
+        }
+    }
+
+
+    /**
+     *  * Asettaa k:n kentän arvoksi parametrina tuodun merkkijonon arvon
+     * @param k kuinka monennen kentän arvo asetetaan
+     * @param jono jonoa joka asetetaan kentän arvoksi
+     * @return null jos asettaminen onnistuu, muuten vastaava virheilmoitus.
+     * @example
+     * <pre name="test">
+     *   Asiakas jasen = new Asiakas();
+     *   jasen.aseta(1,"Ankka Aku") === null;
+     *   jasen.aseta(2,"030201-111C") === null; 
+     *   jasen.aseta(9,"1940") === null;
+     * </pre>
+    
+     */
+    public String aseta(int k, String jono) {
+        String tjono = jono.trim();
+        StringBuffer sb = new StringBuffer(tjono);
+        switch (k) {
+        case 0:
+            setTunnusNro(Mjonot.erota(sb, '§', getTunnusNro()));
+            return null;
+        case 1:
+            nimi = tjono;
+            return null;
+        case 2:
+            if (jono.matches("^[0-9]{10}")) {
+                puhelinnumero = tjono;
+                return null;
+            }
+            return "puhelinnumero voi sisältää vain numeroita";
+
+        case 3:
+            katuosoite = tjono;
+            return null;
+        case 4:
+            if (jono.matches("^[0-9]{5}")) {
+                postinumero = tjono;
+                return null;
+            }
+            return "Postinumeron täytyy olla 5 numeroa pitkä";
+        case 5:
+            if (jono.matches("^[a-zA-Z]*$")) {
+                postiosoite = tjono;
+                return null;
+            }
+            return "Postiosoite voi sisältää vain kirjaimia";
+
+        case 6:
+            if (jono.matches("^(.+)@(.+)$")) {
+                email = tjono;
+                return null;
+            }
+            return "anna sähköposti muodossa sahkoposti@email.com";
+
+        case 7:
+            if (jono.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                alkamispv = tjono;
+                return null;
+            }
+            return "Anna pvm muodossa VVVV-KK-PV";
+        case 8:
+            if (jono.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                loppumispv = tjono;
+                return null;
+            }
+            return "Anna pvm muodossa VVVV-KK-PV";
+        default:
+            return "JeJee";
+        }
+    }
+
+
+    /**
+     * @param k Palauttaa asiakkaan K kentän kysymyksen
+     * @return k kenttää vastaava kysymys
+     */
+    public String getKysymys(int k) {
+        switch (k) {
+        case 0:
+            return "Tunnus nro";
+        case 1:
+            return "nimi";
+        case 2:
+            return "puhelinnumero";
+        case 3:
+            return "katuosoite";
+        case 4:
+            return "postinumero";
+        case 5:
+            return "postiosoite";
+        case 6:
+            return "sähköposti";
+        case 7:
+            return "alkamispv";
+        case 8:
+            return "loppumispv";
+        default:
+            return "jeeje";
+        }
+    }
+
+
+    @Override
+    public int hashCode() {
+        return tunnusNro;
+    }
+
+
+    /**getteri loppumispv:lle
+     * @return loppumisPv 
+     */
+    public String getLoppumisPv() {
+        return loppumispv;
 
     }
 

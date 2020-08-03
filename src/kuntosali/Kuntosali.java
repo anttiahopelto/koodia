@@ -1,10 +1,13 @@
 package kuntosali;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 
 /**
          * @author antti
-         * @version 9.7.2020
+         * @version 3.8.2020
          *
          */
 public class Kuntosali {
@@ -95,6 +98,39 @@ public class Kuntosali {
 
 
     /**
+     * @param hakuehto hakuehto millä haetaan
+     * @param k etsittävän kentän indeksi
+     * @return tietorakenteen löytyneistä jäsenistä
+     */
+    public Collection<Asiakas> etsi(String hakuehto, int k) {
+        return asiakkaat.etsi(hakuehto, k);
+    }
+
+
+    /**
+     * Poistaa asiakkaista ja ryhmaliikunnoista asiakkaan tiedot 
+     * @param asiakas asiakas jokapoistetaan
+     * @return montako asiakasta poistettiin
+     */
+    public int poista(Asiakas asiakas) {
+        if (asiakas == null)
+            return 0;
+        int ret = asiakkaat.poista(asiakas.getTunnusNro());
+        ryhmaliikunnat.poistaAsiakkaanRL(asiakas.getTunnusNro());
+        return ret;
+    }
+
+
+    /** 
+     * Poistaa ryhmaliikunnan 
+     * @param ryhmaliikunta poistettava rl 
+     */
+    public void poistaRyhmaliikunta(Ryhmaliikunta ryhmaliikunta) {
+        ryhmaliikunnat.poista(ryhmaliikunta);
+    }
+
+
+    /**
      * 
      * @param args ei käytössä
      */
@@ -125,6 +161,41 @@ public class Kuntosali {
         } catch (SailoException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+
+    /**
+     * Tarkistaa onko asiakkuus loppumassa seuraavan kuukauden aikana
+     * @param asiakas asiakas jonka asiakkuus tarkistetaan
+     * @return palauttaa inttinä kuinka monta päivää asiakkuutta jäljellä
+     */
+    public int asiakkuusLoppumassa(Asiakas asiakas) {
+
+        String loppumisPv = asiakas.getLoppumisPv();
+        LocalDate loppuminen = LocalDate.parse(loppumisPv);
+        LocalDate nyt = LocalDate.now();
+
+        long montapv = ChronoUnit.DAYS.between(nyt, loppuminen);
+        return (int) montapv;
+
+    }
+
+
+    /**
+     * @param asiakas lisätäävän asiakkaan viite.  Huom tietorakenne muuttuu omistajaksi 
+     * @throws SailoException jos tietorakenne täynnä
+     */
+    public void korvaaTaiLisaa(Asiakas asiakas) throws SailoException {
+        asiakkaat.korvaaTaiLisaa(asiakas);
+    }
+
+
+    /**
+     * @param ryhma lisätäävän ryhmaliikunnan viite.  Huom tietorakenne muuttuu omistajaksi 
+     * @throws SailoException jos tietorakenne täynnä
+     */
+    public void korvaaTaiLisaa(Ryhmaliikunta ryhma) throws SailoException {
+        ryhmaliikunnat.korvaaTaiLisaa(ryhma);
     }
 
 }

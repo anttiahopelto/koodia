@@ -8,20 +8,21 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>	
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fi.jyu.mit.fxgui.ModalController">
+<BorderPane prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxKuntosali.AsiakasDialogiController">
    <bottom>
       <HBox alignment="TOP_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#handleDefaultCancel" text="Poista jäsen">
+            <Label fx:id="labelVirhe" alignment="CENTER" textFill="RED" />
+            <Button mnemonicParsing="false" onAction="#handleCancel" text="CANCEL">
                <tooltip>
                   <Tooltip text="Tallenna muutokset" />
                </tooltip>
             </Button>
-            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleDefaultOK" text="Tallenna">
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleOK" text="OK">
                <tooltip>
                   <Tooltip text="Tallenna muutokset" />
                </tooltip>
@@ -33,9 +34,9 @@
       </HBox>
    </bottom>
    <center>
-      <ScrollPane fitToWidth="true" BorderPane.alignment="CENTER">
+      <ScrollPane fx:id="panelAsiakas" fitToWidth="true" BorderPane.alignment="CENTER">
          <content>
-            <GridPane hgap="10.0">
+            <GridPane fx:id="gridAsiakas" hgap="10.0">
               <columnConstraints>
                 <ColumnConstraints fillWidth="false" halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -45,25 +46,29 @@
                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
                   <Label text="Nimi" />
-                  <TextField text="Sukunimi Etunimi" GridPane.columnIndex="1" />
+                  <TextField GridPane.columnIndex="1" />
                   <Label text="Puh.Nro." GridPane.rowIndex="1" />
-                  <TextField text="0123456789" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="Sähköposti" GridPane.rowIndex="2" />
-                  <TextField text="esim@esimmail.net" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Osoite" GridPane.rowIndex="3" />
-                  <TextField text="Esimerkkikatu 5, 69420 Esimkaupunki" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label text="Käyttö/vk" GridPane.rowIndex="4" />
-                  <Label text="Käyttö yht." GridPane.rowIndex="5" />
-                  <Label text="Jäsen. voim." GridPane.rowIndex="6" />
-                  <TextField text="12" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField text="245" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                  <TextField text="010318-010720" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Katuosoite" GridPane.rowIndex="3" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="AlkamisPv" GridPane.rowIndex="6" />
+                  <Label text="LoppumisPv" GridPane.rowIndex="7" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <Label text="Postinumero" GridPane.rowIndex="4" />
+                  <Label text="Postiosoite" GridPane.rowIndex="5" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
                <padding>
                   <Insets left="10.0" right="10.0" top="10.0" />

@@ -1,36 +1,56 @@
 package fxKuntosali;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.ResourceBundle;
+import fi.jyu.mit.fxgui.ComboBoxChooser;
+import fi.jyu.mit.fxgui.Dialogs;
+import fi.jyu.mit.fxgui.ListChooser;
+import fi.jyu.mit.fxgui.ModalController;
+import fi.jyu.mit.fxgui.StringGrid;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Font;
+import javafx.scene.layout.GridPane;
 import kuntosali.Asiakas;
 import kuntosali.Kuntosali;
 import kuntosali.Ryhmaliikunta;
 import kuntosali.SailoException;
-
-import java.io.PrintStream;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import fi.jyu.mit.fxgui.*;
+import static fxKuntosali.AsiakasDialogiController.getFieldId;
 
 /**
  * @author antti
- * @version 12.6.2020
+ * @version 2.8.2020
  *
  */
 public class HarkkaGUIController implements Initializable {
 
     @FXML
+    private Label labelLoppumassa;
+
+    @FXML
+    private GridPane gridAsiakas;
+
+    @FXML
+    private StringGrid<Ryhmaliikunta> tableRyhmaliikunnat;
+
+    @FXML
     private TextField hakuehto;
+
     @FXML
     ListChooser<Asiakas> chooserAsiakkaat;
+
     @FXML
     ScrollPane panelAsiakas;
+
     @FXML
     private ComboBoxChooser<String> cbKentat;
     private String kuntosalinnimi = "kuntosali";
@@ -61,6 +81,12 @@ public class HarkkaGUIController implements Initializable {
 
 
     @FXML
+    void handleTarkistaLoppuminen() {
+        asiakkuusLoppumassa();
+    }
+
+
+    @FXML
     void handleLopeta() {
         lopeta();
 
@@ -69,8 +95,14 @@ public class HarkkaGUIController implements Initializable {
 
     @FXML
     void handleMuokkaa() {
-        muokkaa();
+        muokkaa(1);
 
+    }
+
+
+    @FXML
+    void handleMuokkaaRyhma() {
+        muokkaaRyhma();
     }
 
 
@@ -83,14 +115,14 @@ public class HarkkaGUIController implements Initializable {
 
     @FXML
     void handleHaku() {
-        haku();
+        hae(0);
 
     }
 
 
     @FXML
     void handleHakukriteeri() {
-        hakuKriteeri();
+        hae(0);
 
     }
 
@@ -112,96 +144,158 @@ public class HarkkaGUIController implements Initializable {
         poistaRyhma();
     }
 
+
+    @FXML
+    void handlePoistaAsiakas() {
+        poistaAsiakas();
+    }
+
     // --------------------------------------------------------------------------------
 
     /**
      * Kuntosali johon viitataan
      */
     private Kuntosali kuntosali;
-    private TextArea areaAsiakas = new TextArea();
+    private Asiakas asiakasKohdalla;
+    private TextField edits[];
+    private int kentta = 0;
+    private static Asiakas apuAsiakas = new Asiakas();
 
     /**
-     *  Lisää uuden asiakkaan. Tällä hetkellä alustaa oletustiedoilla, myöhemmin avataan dialogi ja voi täyttää oikeat tiedot
+     *  Lisää uuden asiakkaan. Avaa dialogin tietojen täyttämistä varten
      */
     private void uusiAsiakas() {
-        Asiakas uusi = new Asiakas();
-        uusi.rekisteroi();
-        uusi.taytaAsiakas(); // TODO: Korvaa oikealla dialogilla
         try {
+            Asiakas uusi = new Asiakas();
+            uusi = AsiakasDialogiController.kysyAsiakas(null, uusi, 1);
+            if (uusi == null)
+                return;
+            uusi.rekisteroi();
             kuntosali.lisaa(uusi);
+            hae(uusi.getTunnusNro());
         } catch (SailoException e) {
-
             Dialogs.showMessageDialog(
-                    "Ongelmia uuden luomisessa" + e.getMessage());
+                    "ongelmia uuden luomisessa " + e.getMessage());
             return;
         }
-        hae(uusi.getTunnusNro());
     }
 
 
     /**
-     * Hakee asiakkaan tiedot näkymään listchooseriin
-     * @param tunnusNro asiakkaan tunnusnro
+     * Poistetaan listalta valittu jäsen
      */
-    private void hae(int tunnusNro) {
+    private void poistaAsiakas() {
+        Asiakas asiakas = asiakasKohdalla;
+        if (asiakas == null)
+            return;
+        if (!Dialogs.showQuestionDialog("Poisto",
+                "Poistetaanko asiakas: " + asiakas.getNimi(), "Kyllä", "Ei"))
+            return;
+        kuntosali.poista(asiakas);
+        int index = chooserAsiakkaat.getSelectedIndex();
+        hae(0);
+        chooserAsiakkaat.setSelectedIndex(index);
+    }
+
+
+    /**
+     * Hakee jäsenten tiedot listaan
+     * @param tNro asiakkaan tunnusnumero, joka aktivoidaan haun jälkeen  
+     */
+    protected void hae(int tNro) {
+        int nro = tNro; // asiakkaan numero, joka aktivoidaan haun jälkeen
+        if (nro <= 0) {
+            Asiakas kohdalla = asiakasKohdalla;
+            if (kohdalla != null)
+                nro = kohdalla.getTunnusNro();
+        }
+
+        int k = cbKentat.getSelectionModel().getSelectedIndex()
+                + apuAsiakas.ekaKentta();
+        String ehto = hakuehto.getText();
+        if (ehto.indexOf('*') < 0)
+            ehto = "*" + ehto + "*";
+
         chooserAsiakkaat.clear();
+
         int index = 0;
-        for (int i = 0; i < kuntosali.getAsiakkaat(); i++) {
-            Asiakas asiakas = kuntosali.annaAsiakas(i);
-            if (asiakas.getTunnusNro() == tunnusNro)
+        Collection<Asiakas> asiakkaat;
+        asiakkaat = kuntosali.etsi(ehto, k);
+        int i = 0;
+        for (Asiakas asiakas : asiakkaat) {
+            if (asiakas.getTunnusNro() == nro)
                 index = i;
             chooserAsiakkaat.add(asiakas.getNimi(), asiakas);
+            i++;
         }
-        chooserAsiakkaat.setSelectedIndex(index); // tämä tekee muutosviestin
-                                                  // joka näyttää
+        chooserAsiakkaat.setSelectedIndex(index); // tästä tulee muutosviesti
+                                                  // joka näyttää jäsenen
     }
 
 
     /**
-     * Alustetaan listchooseri ja scrollpane jossa näkyy asiakkaat
+     * Alustetaan listchooseri ja gridpane jossa näkyy asiakkaat
      */
     private void alusta() {
-        panelAsiakas.setContent(areaAsiakas);
-        areaAsiakas.setFont(new Font("Times New Roman", 12));
-        panelAsiakas.setFitToHeight(true);
-
         chooserAsiakkaat.clear();
         chooserAsiakkaat.addSelectionListener(e -> naytaAsiakas());
+        edits = AsiakasDialogiController.luoKentat(gridAsiakas);
+        for (TextField edit : edits)
+            if (edit != null) {
+                edit.setEditable(false);
+                edit.setOnMouseClicked(e -> {
+                    if (e.getClickCount() > 1)
+                        muokkaa(getFieldId(e.getSource(), 0));
+                });
+                edit.focusedProperty().addListener(
+                        (a, o, n) -> kentta = getFieldId(edit, kentta));
+            }
+        gridAsiakas.add(labelLoppumassa, 1, 9);
 
     }
 
 
     /**
-     * Kun on valittu asiakas listchooserista, niin tulostetaan se keskellä olevaan textareaan
+     * Kun on valittu asiakas listchooserista, niin tulostetaan se keskellä olevaan gridpaneen
      */
     private void naytaAsiakas() {
-        Asiakas asiakasKohdalla = chooserAsiakkaat.getSelectedObject();
-
+        asiakasKohdalla = chooserAsiakkaat.getSelectedObject();
         if (asiakasKohdalla == null)
             return;
 
-        areaAsiakas.setText("");
-        try (PrintStream os = TextAreaOutputStream
-                .getTextPrintStream(areaAsiakas)) {
-            tulosta(os, asiakasKohdalla);
-        }
+        AsiakasDialogiController.naytaAsiakas(edits, asiakasKohdalla);
+        naytaRyhmaliikunnat(asiakasKohdalla);
+        asiakkuusLoppumassa();
+
     }
 
 
     /**
-     * Tulostaa asiakkaan ja sen ryhmäliikunnat
-     * 
-     * @param os Minne tietovirtaan tulostetaan
-     * @param asiakas asiakas kenet tulostetaan
+     * Laittaa asiakkaan ryhmäliikunnat näkyviin StringGridiin tableRyhmaliikunnat
+     * @param asiakas minkä asiakkaan ryhmaliikunnat näytetän StringGridissä
      */
-    private void tulosta(PrintStream os, Asiakas asiakas) {
-        os.println("------------------------------------------");
-        asiakas.tulosta(os);
-        os.println("------------------------------------------");
-        List<Ryhmaliikunta> loytyneet = kuntosali.annaRyhmaliikunnat(asiakas);
-        for (Ryhmaliikunta ryhma : loytyneet)
-            ryhma.tulosta(os);
+    private void naytaRyhmaliikunnat(Asiakas asiakas) {
+        tableRyhmaliikunnat.clear();
+        if (asiakas == null)
+            return;
 
+        List<Ryhmaliikunta> ryhmaliikunnat = kuntosali
+                .annaRyhmaliikunnat(asiakas);
+        if (ryhmaliikunnat.size() == 0)
+            return;
+        for (Ryhmaliikunta ryhma : ryhmaliikunnat)
+            naytaRyhmaliikunta(ryhma);
+    }
+
+
+    /**
+     * Aliohjelma joka lisää ryhmäliikunnan näkyviin StringGridiin, pilkkoo eka ryhmän attribuutit taulukkoon
+     * @param ryhma ryhmaliikunta joka lisätään tableen
+     */
+
+    private void naytaRyhmaliikunta(Ryhmaliikunta ryhma) {
+        String[] rivi = ryhma.toString().split("\\|"); // TODO tee parempi
+        tableRyhmaliikunnat.add(ryhma, rivi[2], rivi[3], rivi[4]);
     }
 
 
@@ -215,11 +309,23 @@ public class HarkkaGUIController implements Initializable {
 
 
     /**
-     * Aliohjelma, joka avaisi selaimella ikkunan, jossa näkyisi ohjeita ohjelman käyttöön kun valmis
+     * Aliohjelma, joka avaa selaimella verkkosivun, jossa näkyy ohjeita ohjelman käyttöön
      */
     private void apua() {
-        Dialogs.showMessageDialog(
-                "Tämä painike avaisi ohjelman käytöstä kertovan sivun selaimella");
+        if (Desktop.isDesktopSupported()
+                && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(
+                        "https://tim.jyu.fi/view/kurssit/tie/ohj2/2020k/ht/anolahop"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Dialogs.showMessageDialog("Ei onnistuttu avaamaan oletusselainta");
+        }
+
     }
 
 
@@ -229,26 +335,90 @@ public class HarkkaGUIController implements Initializable {
     private void lisaaAsiakas() {
 
         uusiAsiakas();
-        // ModalController.showModal(HarkkaGUIController.class.getResource("LisaysGUIView.fxml"),
-        // "Jäsenen lisääminen", null, "");
     }
 
 
     /**
-     * Aliohjelma, joka lopettaa ohjelman
+     * Aliohjelma joka tarkistaa onko asiakkuus loppumassa 30pv sisällä.
+     * Näyttää paljon päiviä jäljellä. Teksti punainen jos alle 30
+     */
+    private void asiakkuusLoppumassa() {
+        asiakasKohdalla = chooserAsiakkaat.getSelectedObject();
+        int paivia = kuntosali.asiakkuusLoppumassa(asiakasKohdalla);
+        if (paivia < 30 && paivia >= 1) {
+            labelLoppumassa
+                    .setText("Asiakkuutta jäljellä " + paivia + " päivää");
+            labelLoppumassa.getStyleClass().add("virhe");
+            return;
+        }
+        if (paivia < 0) {
+            labelLoppumassa.setText(
+                    "Asiakkuus umpeutunut\n" + -paivia + " päivää sitten");
+            labelLoppumassa.getStyleClass().add("virhe");
+            return;
+        }
+
+        labelLoppumassa.setText("Asiakkuutta jäljellä " + paivia + " päivää");
+        labelLoppumassa.getStyleClass().removeAll("virhe");
+
+    }
+
+
+    /**
+     * Aliohjelma, joka lopettaa ohjelman. Ennen tätä tallentaa myös
      */
     private void lopeta() {
-        Dialogs.showMessageDialog("Tämä painike lopettaa ohjelman");
+        tallenna();
+        Platform.exit();
+    }
+
+
+    /**
+     * Aliohjelma, joka avaa muokkaus dialogin ryhmaliikunnan muokkausta varten
+     */
+    private void muokkaaRyhma() {
+        int r = tableRyhmaliikunnat.getRowNr();
+        if (r < 0)
+            return; // klikattu ehkä otsikkoriviä
+        Ryhmaliikunta ryhma = tableRyhmaliikunnat.getObject();
+        if (ryhma == null)
+            return;
+        int k = tableRyhmaliikunnat.getColumnNr() + ryhma.ekaKentta();
+        try {
+            ryhma = RyhmaDialogiController.kysyRyhma(null, ryhma.clone(), k);
+            if (ryhma == null)
+                return;
+            kuntosali.korvaaTaiLisaa(ryhma);
+            naytaRyhmaliikunnat(asiakasKohdalla);
+            tableRyhmaliikunnat.selectRow(r); // järjestetään sama rivi takaisin
+                                              // valituksi
+        } catch (CloneNotSupportedException e) { /* clone on tehty */
+        } catch (SailoException e) {
+            Dialogs.showMessageDialog(
+                    "Ongelmia lisäämisessä: " + e.getMessage());
+        }
     }
 
 
     /**
      * Aliohjelma, joka avaa muokkausikkunan jäsenelle
      */
-    private void muokkaa() {
-        ModalController.showModal(
-                HarkkaGUIController.class.getResource("MuokkausGUIView.fxml"),
-                "Jäsenen muokkaus", null, "");
+    private void muokkaa(int k) {
+        if (asiakasKohdalla == null)
+            return;
+        try {
+            Asiakas asiakas;
+            asiakas = AsiakasDialogiController.kysyAsiakas(null,
+                    asiakasKohdalla.clone(), k);
+            if (asiakas == null)
+                return;
+            kuntosali.korvaaTaiLisaa(asiakas);
+            hae(asiakas.getTunnusNro());
+        } catch (CloneNotSupportedException e) {
+            //
+        } catch (SailoException e) {
+            Dialogs.showMessageDialog(e.getMessage());
+        }
     }
 
 
@@ -262,22 +432,6 @@ public class HarkkaGUIController implements Initializable {
             // TODO Auto-generated catch block
             Dialogs.showMessageDialog(e.getMessage());
         }
-    }
-
-
-    /**
-     * Aliohjelma, joka hoitaa jäsenten hakemisen
-     */
-    private void haku() {
-        Dialogs.showMessageDialog("Ei osata vielä hakea jäseniä");
-    }
-
-
-    /**
-     * Aliohjelma, jolla valitaan hakukriteeri hakemiseen
-     */
-    private void hakuKriteeri() {
-        Dialogs.showMessageDialog("Ei osata vielä valita hakukriteeriä");
     }
 
 
@@ -297,6 +451,7 @@ public class HarkkaGUIController implements Initializable {
 
 
     /**
+     * Lukee annetun nimen mukaisesta tiedostosa asiakkaat ja niiden ryhmäliikunnat, laittaa myös titleksi nimen
      * @param nimi kuntosalin nimi
      */
     protected void lueTiedosto(String nimi) {
@@ -311,6 +466,10 @@ public class HarkkaGUIController implements Initializable {
     }
 
 
+    /**
+     * Asettaa stagelle titlen
+     * @param title title joka asetetaan näkyviin yläreunaan
+     */
     private void setTitle(String title) {
         ModalController.getStage(chooserAsiakkaat).setTitle(title);
     }
@@ -320,15 +479,20 @@ public class HarkkaGUIController implements Initializable {
      * Lisää listchooserista valitulle asiakkaalle ryhmäliikunnan
      */
     private void lisaaRyhma() {
-        Asiakas asiakasKohdalla = chooserAsiakkaat.getSelectedObject();
+        asiakasKohdalla = chooserAsiakkaat.getSelectedObject();
         if (asiakasKohdalla == null)
             return;
 
+        int asiakasnro = asiakasKohdalla.getTunnusNro();
         Ryhmaliikunta ryhma = new Ryhmaliikunta();
+        ryhma = RyhmaDialogiController.kysyRyhma(null, ryhma, 1);
+        if (ryhma == null)
+            return;
+        ryhma.setAsiakasNro(asiakasnro);
         ryhma.rekisteroi();
-        ryhma.taytaRyhmaliikunta(asiakasKohdalla.getTunnusNro());
         kuntosali.lisaa(ryhma);
         hae(asiakasKohdalla.getTunnusNro());
+
     }
 
 
@@ -336,7 +500,19 @@ public class HarkkaGUIController implements Initializable {
      * Poistaa ryhmän valitulta asiakkaalta
      */
     private void poistaRyhma() {
-        Dialogs.showMessageDialog("Ei osata vielä poistaa ryhmäliikuntaa");
+        int rivi = tableRyhmaliikunnat.getRowNr();
+        if (rivi < 0)
+            return;
+        Ryhmaliikunta ryhma = tableRyhmaliikunnat.getObject();
+        if (ryhma == null)
+            return;
+        kuntosali.poistaRyhmaliikunta(ryhma);
+        naytaRyhmaliikunnat(asiakasKohdalla);
+        int ryhmia = tableRyhmaliikunnat.getItems().size();
+        if (rivi >= ryhmia)
+            rivi = ryhmia - 1;
+        tableRyhmaliikunnat.getFocusModel().focus(rivi);
+        tableRyhmaliikunnat.getSelectionModel().select(rivi);
     }
 
 

@@ -7,18 +7,106 @@ import fi.jyu.mit.ohj2.Mjonot;
 
 /**
  * @author antti
- * @version 9.7.2020
+ * @version 3.8.2020
  *
  */
-public class Ryhmaliikunta {
+public class Ryhmaliikunta implements Cloneable {
 
     private int tunnusNro;
     private int asiakasNro;
     private String nimi = "";
     private String viikonpv = "";
-    private String klo;
+    private String klo = "";
 
     private static int seuraavaNro = 1;
+
+    /**
+     * @return ryhmaliikunnan kenttien lkm
+     */
+    public int getKenttia() {
+        return 5;
+    }
+
+
+    /**
+     * @return ekan täytettävän kentan indeksi
+     */
+    public int ekaKentta() {
+        return 2;
+    }
+
+
+    /**
+     * @param k mones tietokenttä
+     * @return k tietokentän sisältö merkkijonona
+     */
+    public String anna(int k) {
+        switch (k) {
+        case 0:
+            return "" + tunnusNro;
+        case 1:
+            return "" + asiakasNro;
+        case 2:
+            return "" + nimi;
+        case 3:
+            return "" + viikonpv;
+        case 4:
+            return "" + klo;
+        default:
+            return "Jees Jees";
+        }
+    }
+
+
+    /**
+     *  * Asettaa k:n kentän arvoksi parametrina tuodun merkkijonon arvon
+     * @param k kuinka monennen kentän arvo asetetaan
+     * @param jono jonoa joka asetetaan kentän arvoksi
+     * @return null jos asettaminen onnistuu, muuten vastaava virheilmoitus.
+     * @example
+     * <pre name="test">
+     *   Ryhmaliikunta jasen = new Ryhmaliikunta();
+     *   jasen.aseta(2,"Ankka") === null;
+     *   jasen.aseta(3,"maanantai") === null; 
+     *   jasen.aseta(4,"63.00-17.00") === "Anna muodossa 15.30-16.00";
+     * </pre>
+    
+     */
+    public String aseta(int k, String jono) {
+        String tjono = jono.trim();
+        StringBuffer sb = new StringBuffer(tjono);
+        switch (k) {
+        case 0:
+            setTunnusNro(Mjonot.erota(sb, '§', getTunnusNro()));
+            return null;
+        case 1:
+            setAsiakasNro(Mjonot.erota(sb, '§', getAsiakasNro()));
+            return null;
+        case 2:
+            nimi = tjono;
+            return null;
+
+        case 3:
+            if (tjono.matches(
+                    "maanantai|tiistai|keskiviikko|torstai|perjantai|lauantai|sunnuntai")) {
+                viikonpv = tjono;
+                return null;
+            }
+            return "Anna viikonpäivä";
+
+        case 4:
+            if (tjono.matches(
+                    "^(0[0-9]|1[0-9]|2[0-3])\\.[0-5][0-9]-(0[0-9]|1[0-9]|2[0-3])\\.[0-5][0-9]$")) {
+                klo = tjono;
+                return null;
+            }
+            return "Anna muodossa 15.30-16.00";
+
+        default:
+            return "JeJee";
+        }
+    }
+
 
     /**
      * Alustetaan ryhmaliikunta
@@ -122,6 +210,15 @@ public class Ryhmaliikunta {
 
 
     /**
+     * @param nro numero, joka asetetaan asiakasNro:ksi
+     */
+    public void setAsiakasNro(int nro) {
+        asiakasNro = nro;
+
+    }
+
+
+    /**
      * Palautetaan mille asiakkaalle ryhmaliikunta kuuluu
      * @return jäsenen id
      */
@@ -176,6 +273,48 @@ public class Ryhmaliikunta {
         ryhma1.tulosta(System.out);
         ryhma2.tulosta(System.out);
 
+    }
+
+
+    /**
+     * Tehdään identtinen klooni ryhmäliikunnasta
+     * @return Object kloonattu rl
+     * @example
+     * <pre name="test">
+     * #THROWS CloneNotSupportedException 
+     *   Ryhmaliikunta har = new Ryhmaliikunta();
+     *   har.parse("   2   |  10  |   Kalastus  | 1949 | 22 t ");
+     *   Ryhmaliikunta kopio = har.clone();
+     *   kopio.toString() === har.toString();
+     *   har.parse("   1   |  11  |   Uinti  | 1949 | 22 t ");
+     *   kopio.toString().equals(har.toString()) === false;
+     * </pre>
+     */
+    @Override
+    public Ryhmaliikunta clone() throws CloneNotSupportedException {
+        return (Ryhmaliikunta) super.clone();
+    }
+
+
+    /**
+     * @param k Palauttaa asiakkaan K kentän kysymyksen
+     * @return k kenttää vastaava kysymys
+     */
+    public String getKysymys(int k) {
+        switch (k) {
+        case 0:
+            return "Tunnus nro";
+        case 1:
+            return "AsiakasNro";
+        case 2:
+            return "Nimi";
+        case 3:
+            return "ViikonPv";
+        case 4:
+            return "Klo";
+        default:
+            return "jeeje";
+        }
     }
 
 }
