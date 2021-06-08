@@ -1,6 +1,1 @@
-# pohja
-
-Ohjelmointi 2 harjoitustyö
-
-
-
+# Ohjelmointi 2 harjoitustyö
